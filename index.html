@@ -1,0 +1,464 @@
+<!DOCTYPE html><html lang="en">
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kerala Lottery</title>
+  <style>
+    :root{--brand:#0ea5e9;--brand2:#0284c7;--ok:#25D366;--bg:#0b1220;--card:#0f172a;--line:#1f2937;--text:#e5e7eb;--muted:#94a3b8}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,Segoe UI,Inter,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    header{position:sticky;top:0;z-index:50;background:rgba(11,18,32,.9);border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}
+    .container{max-width:1200px;margin:0 auto;padding:14px 16px}
+    .row{display:flex;align-items:center;gap:12px}
+    .grow{flex:1}
+    .badge{border:1px solid var(--line);border-radius:999px;padding:6px 10px;background:#0b1426}
+    .nav{display:flex;gap:10px}
+    .btn{border:1px solid var(--line);background:#111827;color:var(--text);padding:9px 12px;border-radius:10px;cursor:pointer;font-weight:600}
+    .btn.primary{background:var(--brand)}.btn.primary:hover{background:var(--brand2)}
+    .btn.ok{background:var(--ok)}
+    
+    /* ISSUE 2 SOLVED: Changed grid to always be 2 columns for mobile-only view. Removed the media query that made it 4 columns on desktop. */
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+    .p{padding:14px}
+    .title{font-weight:800}
+    .muted{color:var(--muted)}
+    .hidden{display:none}
+    
+    /* ISSUE 1 SOLVED: Hero section now stacks vertically for a mobile view */
+    .hero{display:grid;grid-template-columns:1fr;gap:16px}
+    
+    .icon-tile{display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px;border:1px dashed var(--line);border-radius:14px;background:#0b1528;cursor:pointer}
+    .ticket-card .num{font-size:22px;font-weight:800;letter-spacing:1px}
+    .status{display:inline-flex;gap:6px;align-items:center;border:1px solid #0b513f;background:#052e27;color:#34d399;border-radius:10px;padding:4px 8px;font-size:12px}
+    footer{border-top:1px solid var(--line);margin-top:30px}
+    /* modal */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:14px;z-index:100}
+    .modal{max-width:560px;width:100%;background:#0f172a;border:1px solid var(--line);border-radius:14px}
+    .input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #334155;background:#0b1220;color:var(--text)}
+    .slip{border:1px dashed #334155;border-radius:12px;padding:14px;background:#0b1220}
+    .marquee{overflow:hidden;white-space:nowrap;border:1px solid var(--line);border-radius:12px;background:#0f172a}
+    .marquee .track{display:inline-block;animation:sc 28s linear infinite}
+    .marquee span{display:inline-block;padding:10px 18px}
+    @keyframes sc{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+    /* ISSUE 1 SOLVED: Centering all header content for mobile view. */
+    header .container.row {
+        flex-direction: column;
+        text-align: center;
+    }
+    header .row {
+        flex-direction: column;
+        width: 100%;
+    }
+    header .grow { display: none; } /* Hide the spacer div */
+    header .nav {
+        margin-top: 10px;
+        justify-content: center;
+        width: 100%;
+    }
+
+    /* ISSUE 1 SOLVED: Centering footer content. */
+    footer.container {
+        text-align: center;
+        display: flex;
+        justify-content: center;
+    }
+
+    /* ISSUE 5 SOLVED: Make the payment modal content scrollable on smaller screens. */
+    .modal > .p {
+        max-height: 75vh;
+        overflow-y: auto;
+    }
+
+    /* ISSUE 4 SOLVED: Centering QR code inside its container. */
+    .qr-container {
+      text-align: center;
+    }
+
+    /* ISSUE 6 SOLVED: Centering the payment buttons */
+    .payment-buttons {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    /* ISSUE 7 SOLVED: Adding space between the label and input box in the result section */
+    #result .muted {
+      display: block;
+      margin-bottom: 6px;
+    }
+.btn.btn-whatsapp {
+  background-color: #25D366; /* WhatsApp green */
+  border-color: #1f8b47; /* A slightly darker border for contrast */
+}
+.btn.btn-whatsapp:hover {
+  background-color: #20c25a; /* A slightly lighter green for hover effect */
+}
+</style>
+</head>
+<body>
+  <header>
+    <div class="container row">
+          <div class="title" style="font-size:20px">Kerala Lottery</div>
+          <div class="muted" style="font-size:12px">Government Of Kerala (Official)</div>
+        </div>
+      </div>
+      <div class="row">
+        <span class="badge">📞 +91 89819 19135</span>
+        <span class="badge">✉️ keralalottery.helpdesk@gmail.com</span>
+        <div class="nav">
+          <button class="btn" onclick="go('#/home')">Home</button>
+          <button class="btn" onclick="go('#/tickets')">Lottery Tickets</button>
+          <button class="btn" onclick="go('#/result')">Lottery Result</button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <main class="container">
+    <section id="home">
+      <div class="marquee"><div id="topTrack" class="track"></div><div id="topTrack2" class="track" aria-hidden="true"></div></div>
+      <div style="height:16px"></div>
+      <div class="hero">
+        <div class="card"><div class="p">
+          <div class="title" style="font-size:18px">Quick Actions</div>
+          <div style="height:10px"></div>
+          <div class="grid">
+            <div class="icon-tile" onclick="go('#/tickets')">
+              <div style="font-size:36px">🎟️</div>
+              <div class="title">Lottery Ticket</div>
+              <div class="muted" style="font-size:12px">Browse & Buy</div>
+            </div>
+            <div class="icon-tile" onclick="go('#/result')">
+              <div style="font-size:36px">🏆</div>
+              <div class="title">Lottery Result</div>
+              <div class="muted" style="font-size:12px">Check & Claim</div>
+            </div>
+          </div>
+        </div></div>
+        <div class="card"><div class="p">
+          <div class="title" style="font-size:18px">Recent Winners</div>
+          <div id="winners" style="display:grid;gap:10px;margin-top:10px"></div>
+        </div></div>
+      </div>
+    </section><section id="tickets" class="hidden">
+  <div class="row" style="justify-content:space-between;align-items:end">
+    <div>
+      <div class="title" style="font-size:20px">Lottery Tickets</div>
+      <div class="muted" style="font-size:12px">Price: ₹40 / ticket</div>
+    </div>
+    <div class="row" style="gap:8px">
+      <button class="btn" onclick="downloadCSV()">📤 Download CSV</button>
+    </div>
+  </div>
+  <div style="height:12px"></div>
+  <div id="ticketsGrid" class="grid"></div>
+</section>
+
+<section id="result" class="hidden">
+  <div class="title" style="font-size:20px">Lottery Result</div>
+  <div style="height:10px"></div>
+  <div class="card"><div class="p">
+    <div class="row" style="gap:12px;flex-wrap:wrap">
+      <div style="flex:1;min-width:240px">
+        <div class="muted" style="font-size:12px">Lottery Number (e.g., KL7654)</div>
+        <input id="lotInput" class="input" placeholder="KL0000">
+      </div>
+      <div style="flex:1;min-width:240px">
+        <div class="muted" style="font-size:12px">Reference Number (6 digits)</div>
+        <input id="refInput" class="input" placeholder="123456" maxlength="6" inputmode="numeric">
+      </div>
+      <div>
+        <button class="btn primary" onclick="checkResult()">Check Result</button>
+      </div>
+    </div>
+    <div style="height:12px"></div>
+    <div id="resultBox" class="slip hidden"></div>
+  </div></div>
+</section>
+<!-- Font Awesome CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<!-- ISSUE 9 SOLVED: Floating Icons moved to bottom right. Changed `top` to `bottom` and removed the transform. -->
+<div style="
+  position: fixed;
+  bottom: 20px;            /* screen ke neeche */
+  right: 20px;             /* right side chipka hua */
+  display: flex;
+  flex-direction: column;
+  gap: 15px;               /* icons ke beech halka distance */
+  z-index: 1000;
+">
+  <!-- Call Button -->
+  <a href="tel:+918981919135" style="
+    background: #222;
+    color: white;
+    font-size: 26px; 
+    width: 55px;
+    height: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    text-decoration: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  ">
+    <i class="fas fa-phone"></i>
+  </a>
+
+  <!-- WhatsApp Button -->
+  <a href="https://wa.me/918981919135" target="_blank" style="
+    background: #25D366;
+    color: white;
+    font-size: 28px;
+    width: 55px;
+    height: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    text-decoration: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  ">
+    <i class="fab fa-whatsapp"></i>
+  </a>
+</div>
+  </main>
+  <footer class="container" style="padding:16px 0" class="muted">© <span id="yr"></span> Kerala Lottery • Government Of Kerala </footer>
+  <!-- Payment Modal -->
+  <div id="payModal" class="overlay">
+    <div class="modal">
+      <div class="p row" style="justify-content:space-between;border-bottom: 1px solid var(--line);"><div class="title"> Payment Process</div><button class="btn" onclick="closePay()">✕</button></div>
+      <div class="p">
+        <div id="payTicket" class="slip"></div>
+        <div style="height:12px"></div>
+        <div class="row" style="gap:16px;flex-wrap:wrap;align-items:start">
+          <div class="qr-container">
+            <div class="muted" style="font-size:12px">Scan & Pay (₹40)</div>
+            <!-- ISSUE 4 SOLVED: Cleaned up invalid HTML (removed nested body/html tags) and centered the QR code content. -->
+            <div class="cards" style="background-color:white; padding: 20px; border-radius: 15px; display: inline-block; margin-top: 5px;">
+              <div style="color: black; font-weight: bold; margin-bottom: 8px;">RATAN KARMAKAR</div><br><br>
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=9163855009@ptsbi&pn=Ratan%20Karmakar&am=40.00&cu=INR" 
+                   alt="Paytm UPI QR" style="max-width: 100%; height: auto;"><br>
+              <div style="margin-top: 10px; font-weight: bold; font-size: 18px; color: black;">9163855009@ptsbi</div>
+            </div>
+          </div>
+          <div style="flex:1;min-width:240px">
+            <div class="muted" style="font-size:12px:">Enter Txn/UTR ID</div>
+            <input id="utr" class="input" placeholder="Transaction ID">
+            <div style="height:10px"></div>
+            <!-- ISSUE 6 SOLVED: Wrapped buttons in a div with centering styles for proper alignment. -->
+        <!-- CORRECTED: Both buttons now use the .btn class for consistent sizing -->
+<div style="display:flex; flex-direction:column; align-items:center; gap:10px; width: 100%; max-width: 280px;">
+    <button class="btn ok" onclick="confirmPayment()" style="width: 100%;">Mark as Paid</button> 
+    
+    <a href="https://wa.me/918981919135" target="_blank" class="btn btn-whatsapp" style="width: 100%; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px;">
+      <i class="fab fa-whatsapp"></i> <!-- Using Font Awesome icon for consistency -->
+      <span>Send Payment Slip</span>
+    </a>
+</div>
+          </div>
+        </div>
+        <div style="height:12px"></div>
+        <div id="slipBox" class="hidden">
+          <div id="slipOut" class="slip"></div>
+          <div style="height:10px"></div>
+          <button class="btn" onclick="printSlip()">🖨️ Print / Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const byId = id=>document.getElementById(id);
+    const go = h=>{location.hash=h; route();};
+    const fmtINR = n=> n.toLocaleString('en-IN'); // Better formatting for Indian Rupees
+
+    // ---------------- DATA ----------------
+    // ISSUE 10 & 11 SOLVED:
+    // The original single 'tickets' array has been split into three separate, non-overlapping arrays.
+    // 1. `winningTickets`: For the "Recent Winners" list.
+    // 2. `marqueeTickets`: For the scrolling text at the top.
+    // 3. `availableTickets`: For the "Lottery Tickets" section, available for purchase.
+    // This ensures that a ticket shown as a winner or in the marquee is not available to buy.
+    
+    const allTickets = [
+      {lottery:"KL5287", reference:"913472", prize:200000000}, {lottery:"KL9042", reference:"625183", prize:17650000}, {lottery:"KL3716", reference:"482915", prize:12500000}, {lottery:"KL6583", reference:"749520", prize:9600000}, {lottery:"KL2479", reference:"834162", prize:5200000}, {lottery:"KL8051", reference:"159384", prize:18500000}, {lottery:"KL9320", reference:"276419", prize:7400000}, {lottery:"KL4168", reference:"537982", prize:5100000}, {lottery:"KL7504", reference:"698135", prize:11400000}, {lottery:"KL1835", reference:"845726", prize:8900000}, {lottery:"KL5297", reference:"267193", prize:13400000}, {lottery:"KL6902", reference:"924851", prize:7800000}, {lottery:"KL8421", reference:"351826", prize:5600000}, {lottery:"KL3745", reference:"692308", prize:15000000}, {lottery:"KL1986", reference:"470251", prize:6300000}, {lottery:"KL6039", reference:"837492", prize:9700000}, {lottery:"KL2517", reference:"128905", prize:5200000}, {lottery:"KL9874", reference:"593827", prize:14200000}, {lottery:"KL7405", reference:"864392", prize:8800000}, {lottery:"KL3158", reference:"472960", prize:5100000}, {lottery:"KL5728", reference:"639280", prize:11800000}, {lottery:"KL9604", reference:"258317", prize:5200000}, {lottery:"KL4389", reference:"715902", prize:8700000}, {lottery:"KL2846", reference:"943761", prize:15600000}, {lottery:"KL7095", reference:"381629", prize:5400000}, {lottery:"KL1928", reference:"804357", prize:9800000}, {lottery:"KL6507", reference:"172495", prize:5100000}, {lottery:"KL8234", reference:"940268", prize:17800000}, {lottery:"KL4759", reference:"263580", prize:7400000}, {lottery:"KL3162", reference:"598472", prize:13400000}, {lottery:"KL8073", reference:"745913", prize:9100000}, {lottery:"KL2948", reference:"537129", prize:5900000}, {lottery:"KL9625", reference:"829461", prize:12400000}, {lottery:"KL4057", reference:"614392", prize:6700000}, {lottery:"KL7310", reference:"279516", prize:9900000}, {lottery:"KL5681", reference:"853720", prize:5400000}, {lottery:"KL2475", reference:"635289", prize:14800000}, {lottery:"KL6942", reference:"920851", prize:8800000}, {lottery:"KL8509", reference:"347610", prize:5200000}, {lottery:"KL1376", reference:"769432", prize:10900000}, {lottery:"KL9271", reference:"540982", prize:12500000}, {lottery:"KL3186", reference:"879412", prize:5800000}, {lottery:"KL6402", reference:"253791", prize:9400000}, {lottery:"KL7589", reference:"691203", prize:5100000}, {lottery:"KL2057", reference:"824369", prize:15400000}, {lottery:"KL9823", reference:"375108", prize:8900000}, {lottery:"KL4135", reference:"962847", prize:7200000}, {lottery:"KL8764", reference:"184529", prize:5200000}, {lottery:"KL2597", reference:"608314", prize:11300000}, {lottery:"KL7301", reference:"492817", prize:9600000}, {lottery:"KL5948", reference:"735280", prize:6700000}, {lottery:"KL8260", reference:"214395", prize:10500000}, {lottery:"KL3417", reference:"958402", prize:5900000}, {lottery:"KL9705", reference:"641283", prize:13900000}, {lottery:"KL4829", reference:"739516", prize:8800000}, {lottery:"KL2508", reference:"863294", prize:5100000}, {lottery:"KL7694", reference:"342189", prize:14700000}, {lottery:"KL6213", reference:"918547", prize:9700000}, {lottery:"KL4078", reference:"536201", prize:5400000}, {lottery:"KL8951", reference:"763958", prize:11000000},
+    ];
+    // Sort all tickets by prize amount once
+    allTickets.sort((a,b) => b.prize - a.prize);
+    
+    // Create the separate arrays
+    const winningTickets = allTickets.slice(0, 20); // Top 20 for winner list
+    const marqueeTickets = allTickets.slice(20, 35); // Next 15 for marquee
+    const availableTickets = allTickets.slice(35); // The rest are available for sale
+
+    // ISSUE 3 SOLVED: Added random Indian names and locations for the winner list.
+    const randomNames = ["Arjun Kumar", "Priya Sharma", "Rohan Mehta", "Sneha Patel", "Vikram Singh", "Anjali Reddy", "Amit Das", "Kavita Nair", "Suresh Iyer", "Geeta Rao", "Rajesh Menon", "Deepa Krishnan", "Manoj Pillai", "Sunita Joshi", "Harish Kumar", "Lakshmi Murthy", "Prakash Gupta", "Meena Desai", "Vinod Bhat", "Rekha Varma"];
+    const randomLocations = ["Mumbai, MH", "Delhi, DL", "Bengaluru, KA", "Chennai, TN", "Kolkata, WB", "Hyderabad, TS", "Pune, MH", "Ahmedabad, GJ", "Jaipur, RJ", "Kochi, KL", "Thiruvananthapuram, KL", "Coimbatore, TN", "Lucknow, UP", "Chandigarh, CH", "Bhopal, MP", "Visakhapatnam, AP", "Indore, MP", "Patna, BR", "Nagpur, MH", "Vadodara, GJ"];
+
+    // ---------------- ROUTER ----------------
+    function route(){
+      const h = location.hash || '#/home';
+      ['home','tickets','result'].forEach(id=>byId(id).classList.add('hidden'));
+      if(h.startsWith('#/home')) byId('home').classList.remove('hidden');
+      if(h.startsWith('#/tickets')) byId('tickets').classList.remove('hidden');
+      if(h.startsWith('#/result')) byId('result').classList.remove('hidden');
+    }
+    window.addEventListener('hashchange', route);
+
+    // ---------------- RENDER ----------------
+    function renderTickets(){
+      const grid = byId('ticketsGrid');
+      // Now uses `availableTickets` array
+      grid.innerHTML = availableTickets.map(t=>`<div class="card ticket-card"><div class="p">
+          <div class="muted" style="font-size:12px">Lottery Number</div>
+          <div class="num">${t.lottery}</div>
+          <div class="status" style="margin:8px 0">● Active</div>
+          <button class="btn primary" onclick="buy('${t.lottery}')">Buy Now – ₹40</button>
+        </div></div>`).join('');
+    }
+
+    function renderTop(){
+      // Marquee now uses `marqueeTickets` array
+      const track = marqueeTickets.map(t=>`<span>🏆 <strong>${t.lottery}</strong> • ₹${fmtINR(t.prize)}</span>`).join('');
+      byId('topTrack').innerHTML = track + track;
+      byId('topTrack2').innerHTML = track + track;
+
+      // Winner list now uses `winningTickets` array
+      const win = byId('winners');
+      // ISSUE 3 SOLVED: The winner list now includes the random name and location.
+      win.innerHTML = winningTickets.map((t,i)=>`<div style="display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:8px;background:#0f172a">
+        <img src="https://i.pravatar.cc/100?img=${(i+11)%70}" style="width:42px;height:42px;border-radius:10px"/>
+        <div>
+          <div style="font-weight:700">${randomNames[i % randomNames.length]}</div>
+          <div class="muted" style="font-size:12px">${randomLocations[i % randomLocations.length]}</div>
+          <div class="muted" style="font-size:12px">${t.lottery} • ₹${fmtINR(t.prize)}</div>
+        </div>
+      </div>`).join('');
+    }
+
+    // ---------------- BUY FLOW ----------------
+    let currentTicket=null;
+    function buy(lot){
+      currentTicket = availableTickets.find(t=>t.lottery===lot); // Search in available tickets
+      if(!currentTicket) return alert('Ticket not found');
+      byId('payTicket').innerHTML = `<div><strong>Ticket</strong>: ${currentTicket.lottery}</div>
+        <div><strong>Price</strong>: ₹40</div>`;
+      byId('slipBox').classList.add('hidden');
+      byId('utr').value='';
+      byId('payModal').style.display='flex';
+    }
+    function closePay(){byId('payModal').style.display='none'}
+    function confirmPayment(){
+      const utr = byId('utr').value.trim();
+      if(!utr) return alert('Enter Txn/UTR ID');
+      const ts = new Date().toLocaleString();
+      byId('slipOut').innerHTML = `<div class="muted" style="font-size:12px">Payment Receipt</div>
+        <div class="title" style="font-size:18px">Lottery Purchase Slip</div>
+        <div style="height:8px"></div>
+        <div><strong>Ticket</strong>: ${currentTicket.lottery}</div>
+        <div><strong>Reference</strong>: ${currentTicket.reference}</div>
+        <div><strong>Amount Paid</strong>: ₹40</div>
+        <div><strong>Txn/UTR</strong>: ${utr}</div>
+        <div><strong>Date</strong>: ${ts}</div>`;
+      byId('slipBox').classList.remove('hidden');
+    }
+    function printSlip(){
+      const w = window.open('', '_blank');
+      w.document.write(`<html><head><title>Lottery Slip</title><style>body{font-family:Segoe UI,Arial;padding:18px} .slip{border:1px solid #ccc;border-radius:12px;padding:14px}</style></head><body><div class="slip">${byId('slipOut').innerHTML}</div></body></html>`);w.document.close(); w.print();
+    }
+
+    // ---------------- RESULT CHECK ----------------
+    function checkResult(){
+      const lot = byId('lotInput').value.trim().toUpperCase();
+      const ref = byId('refInput').value.trim();
+      if(!/^([A-Z]{2})\d{4}$/.test(lot)) return alert('Enter valid Lottery Number (e.g., KL7654)');
+      if(!/^\d{6}$/.test(ref)) return alert('Enter 6-digit Reference');
+      
+      // Search for the ticket in the entire dataset since a winner could be checking their result
+      const t = allTickets.find(x=>x.lottery===lot && x.reference===ref);
+      const box = byId('resultBox');
+      box.classList.remove('hidden');
+      if(!t){
+        box.innerHTML = `<div style="color:#fca5a5">❌ No match found. Please recheck details.</div>`; return;
+      }
+      
+      // ISSUE 8 SOLVED: The "Submit Claim" button now calls the new `submitClaim` function.
+      // IDs have been added to the input fields for easy access.
+      box.innerHTML = `
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><div style="font-size:22px">🎉 <strong>Congratulations!</strong></div><span class="status">Verified</span></div>
+        <div style="height:10px"></div>
+        <div><strong>Lottery</strong>: ${t.lottery}</div>
+        <div><strong>Reference</strong>: ${t.reference}</div>
+        <div><strong>Prize</strong>: ₹${fmtINR(t.prize)}</div>
+        <div style="height:10px"></div>
+        <div class="row" style="gap:8px;flex-wrap:wrap">
+          <input id="claimName" class="input" placeholder="Name" style="flex:1;min-width:200px">
+          <input id="claimMobile" class="input" placeholder="Mobile Number" style="flex:1;min-width:200px" inputmode="tel">
+          <input id="claimEmail" class="input" placeholder="Email (optional)" style="flex:1;min-width:200px" type="email">
+          <input id="claimStreet" class="input" placeholder="Street" style="flex:1;min-width:200px">
+          <input id="claimState" class="input" placeholder="State" style="flex:1;min-width:200px">
+          <button class="btn ok" onclick="submitClaim('${t.lottery}', '${t.reference}', '${fmtINR(t.prize)}')">Submit Claim</button>
+        </div>`;
+    }
+
+    // ISSUE 8 SOLVED: New function to handle the claim submission.
+    function submitClaim(lottery, reference, prize) {
+      const name = byId('claimName').value.trim();
+      const mobile = byId('claimMobile').value.trim();
+      const email = byId('claimEmail').value.trim();
+      const street = byId('claimStreet').value.trim();
+      const state = byId('claimState').value.trim();
+      
+      if (!name || !mobile || !street || !state) {
+        alert('Please fill all required fields (Name, Mobile, Street, State).');
+        return;
+      }
+
+      // Show confirmation alert
+      alert('Congratulations! Your claim is ready to be submitted. Click OK to send the details to our team via WhatsApp.');
+
+      // Construct the WhatsApp message
+      const message = `
+--- KERALA LOTTERY CLAIM ---
+Lottery Number: ${lottery}
+Reference: ${reference}
+Prize Won: ₹${prize}
+
+--- CLAIMANT DETAILS ---
+Name: ${name}
+Mobile: ${mobile}
+Email: ${email || 'Not Provided'}
+Address: ${street}, ${state}
+
+Please process my claim.
+      `.trim();
+      
+      const whatsappNumber = '918981919135';
+      const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+      
+      // Redirect to WhatsApp
+      window.open(whatsappURL, '_blank');
+    }
+
+    // ---------------- CSV EXPORT ----------------
+    function downloadCSV(){
+      const header = 'lottery,reference,prize\n';
+      // Export only available tickets
+      const body = availableTickets.map(t=>`${t.lottery},${t.reference},${t.prize}`).join('\n');
+      const blob = new Blob([header+body],{type:'text/csv'}); const url=URL.createObjectURL(blob);
+      const a=document.createElement('a'); a.href=url; a.download='available-tickets.csv'; a.click(); URL.revokeObjectURL(url);
+    }
+
+    // Boot
+    document.getElementById('yr').textContent = new Date().getFullYear();
+    function init(){route(); renderTickets(); renderTop();}
+    window.addEventListener('load', init);
+
+  </script>
+</body>
+</html>
